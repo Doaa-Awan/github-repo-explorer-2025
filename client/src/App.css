@@ -2,41 +2,62 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  /* text-align: center; */
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.login {
+  margin: 250px 0 100px 0;
+  display: flex;
+  justify-content: center;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
+.login label {
   color: #888;
+  margin-right: 1rem;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.login #email, #password {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 18px;
+  margin: 10px 0;
+  display: block;
+  width: 250px
+}
+
+.login .btn-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.login .btn-container input {
+  border: none;
+  padding: 10px 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 20px 0;
+  color: lightgray;
+}
+
+.btn-login {
+  background-color: #084c94;
+}
+
+.btn-register {
+  background-color: #18667a;
+}
+
+.btn-login:hover {
+  background-color: #007BFF;
+  filter: drop-shadow(0 0 2em #646cffaa);
+  color: #fff!important;
+}
+
+.btn-register:hover {
+  background-color: #109cc3aa;
+  filter: drop-shadow(0 0 2em #61dafbaa);
+  color: #fff!important;
 }
