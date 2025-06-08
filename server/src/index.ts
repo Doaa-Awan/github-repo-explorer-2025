@@ -15,13 +15,16 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 app.use(cookieParser()); //parse cookies
 app.use(express.json()); //parse incoming JSON requests
-app.use(cors( //requests accepted from React app
+app.use(
+  cors(
+    //requests accepted from React app
     {
-        origin: 'http://localhost:5173', //React app URL
-        methods: ["GET", "POST", "PUT", "DELETE"],
-        credentials: true
+      origin: 'http://localhost:5173', //React app URL
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      credentials: true,
     }
-));
+  )
+);
 
 app.get('/', (_req, res) => {
   res.json({ message: 'Hello, TypeScript + Express!' });
@@ -32,7 +35,9 @@ app.get('/', (_req, res) => {
 app.get('/api/github/:username/repos', async (req, res) => {
   const { username } = req.params;
   try {
-    const response = await fetch(`https://api.github.com/users/${username}/repos`);
+    const response = await fetch(
+      `https://api.github.com/users/${username}/repos`
+    );
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -41,25 +46,26 @@ app.get('/api/github/:username/repos', async (req, res) => {
   } catch (error) {
     console.error('Error fetching GitHub repos:', error);
     res.status(500).json({ error: 'Failed to fetch GitHub repos' });
-  } 
+  }
 });
 
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   // console.log('Login attempt:', { email, password }); // Log the login attempt
-  try{
+  try {
     let { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password
-    })
+      email: email,
+      password: password,
+    });
     if (data?.session?.access_token) {
       res
-        .cookie('supabase_token', data.session.access_token, { //save token in cookie
+        .cookie('supabase_token', data.session.access_token, {
+          //save token in cookie
           httpOnly: true,
           secure: true,
         })
         .status(200)
-        .json({ message: 'Token set'});
+        .json({ message: 'Token set' });
     }
     // res.status(200).json({ message: 'Login successful', data: data });
   } catch (error) {
@@ -70,13 +76,14 @@ app.post('/api/login', async (req, res) => {
   // console.log('Supabase response:', { data, error }); // Log the Supabase response
 });
 
-
 app.get('/api/favorites', async (req, res) => {
   //console.log('Fetching favorites...'); // Log the request
   // const { user_id } = req.params;
   const supabaseToken = req.cookies.supabase_token; // Get the Supabase token from cookies
   // console.log(await supabase.auth.getUser(supabaseToken)); // Ensure the user is authenticated
-  const { data: { user }} = await supabase.auth.getUser(supabaseToken);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(supabaseToken);
 
   //console.log('Authenticated user:', user); // Log the authenticated user
 
@@ -85,7 +92,7 @@ app.get('/api/favorites', async (req, res) => {
     return;
   }
 
-  //console.log('Supabase token:', supabaseToken); 
+  //console.log('Supabase token:', supabaseToken);
 
   const { data, error } = await supabase
     .from('favourite_repositories')
@@ -96,7 +103,16 @@ app.get('/api/favorites', async (req, res) => {
     return;
   }
   res.json(data);
-}); 
+});
+
+app.post('/api/logout', (req, res) => {
+  res.clearCookie('supabase_token', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+  });
+  res.status(200).json({ message: 'Logged out' });
+});
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

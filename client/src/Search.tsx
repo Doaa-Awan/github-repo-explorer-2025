@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import styles from './styles/SearchStyles.module.css';
 
 export default function Search() {
-const navigate = useNavigate();
-  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
   const [searchUsername, setSearchUsername] = useState('');
   const [repos, setRepos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
 
+  // Check auth status by calling the backend
   useEffect(() => {
     axios
-      .get('http://localhost:8080/')
-      .then((response: { data: any }) => {
-        setMessage(response.data.message || 'No message received');
-      })
-      .catch(() => {
-        setMessage('Error fetching data from server');
+      .get('http://localhost:8080/api/favorites', { withCredentials: true })
+      .then(() => setLoggedIn(true))
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          setLoggedIn(false);
+        }
       });
   }, []);
 
@@ -31,7 +33,6 @@ const navigate = useNavigate();
         `http://localhost:8080/api/github/${searchUsername}/repos`
       );
       setRepos(response.data as any[]);
-      console.log(response.data);
     } catch (err) {
       setError('Failed to fetch repositories');
     } finally {
@@ -39,32 +40,58 @@ const navigate = useNavigate();
     }
   };
 
+  const handleLogout = async () => {
+    await axios.post(
+      'http://localhost:8080/api/logout',
+      {},
+      { withCredentials: true }
+    );
+    confirm('Are you sure you want to logout?');
+    if (!confirm) return;
+    setLoggedIn(false);
+    // navigate('/login');
+  };
+
   return (
-    <>
-      <p>{message}</p>
-      <button onClick={() => navigate('/favourites')}>View Favourites</button>
-      <form onSubmit={handleSubmit}>
-        <input
-          type='text'
-          value={searchUsername}
-          onChange={(e) => setSearchUsername(e.target.value)}
-          placeholder='GitHub username'
-        />
+    <div className={styles.search}>
+      <div className={styles.btnLoginContainer}>
+        {loggedIn ? (
+          <button onClick={handleLogout}>Logout</button>
+        ) : (
+          <button onClick={() => navigate('/login')}>Login</button>
+        )}
+      </div>
+      <form onSubmit={handleSubmit} className='search-form'>
+        <div>
+          <label htmlFor='search'>Search GitHub Repositories</label>
+          <input
+            type='text'
+            id='search'
+            value={searchUsername}
+            onChange={(e) => setSearchUsername(e.target.value)}
+            placeholder='GitHub username'
+          />
+        </div>
         <button type='submit' disabled={loading || !searchUsername}>
           {loading ? 'Searching...' : 'Search'}
         </button>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      <ul>
-        {repos.map((repo) => (
-          <li key={repo.id}>
-            <a href={repo.html_url} target='_blank' rel='noopener noreferrer'>
-              {repo.name}
-            </a>
-            {repo.description && <span>: {repo.description}</span>}
-          </li>
-        ))}
-      </ul>
-    </>
+      <div>
+        <ul>
+          {repos.map((repo) => (
+            <li key={repo.id}>
+              <a href={repo.html_url} target='_blank' rel='noopener noreferrer'>
+                {repo.name}
+              </a>
+              {repo.description && <span>: {repo.description}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+      {loggedIn ? (
+        <button onClick={() => navigate('/favourites')}>View Favourites</button>
+      ) : null}
+    </div>
   );
 }

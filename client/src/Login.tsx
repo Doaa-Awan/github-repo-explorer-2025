@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styles from './styles/LoginStyles.module.css'; // Assuming you have a CSS module for styles
 import axios from 'axios';
 
 export default function Login() {
@@ -8,7 +9,6 @@ export default function Login() {
   const navigate = useNavigate();
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // console.log('Login attempt:', { email, password });
     axios
       .post('http://localhost:8080/api/login', {
         email: email,
@@ -29,7 +29,7 @@ export default function Login() {
       });
   };
   return (
-    <div className='login'>
+    <div className={styles.login}>
       <div>
         <form onSubmit={handleLogin}>
           <div>
@@ -38,6 +38,7 @@ export default function Login() {
               type='text'
               id='email'
               name='email'
+              className={styles.inputEmail}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -47,17 +48,18 @@ export default function Login() {
               type='password'
               id='password'
               name='password'
+              className={styles.inputPassword}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <div className='btn-container'>
-            <input type='submit' value='Login' className='btn-login' />
-            {/* <input 
+          <div className={styles.btnContainer}>
+            <input type='submit' value='Login' className={styles.btnLogin} />
+            <input 
                 type="submit" 
                 value="Register" 
-                className="btn-register"
-                onClick = {addUser}
-              /> */}
+                className={styles.btnRegister}
+                // onClick = {addUser}
+              />
           </div>
         </form>
       </div>
