@@ -28,6 +28,7 @@ export default function Search() {
     setLoading(true);
     setError('');
     setRepos([]);
+    console.log(repos);
     try {
       const response = await axios.get(
         `http://localhost:8080/api/github/${searchUsername}/repos`
@@ -56,41 +57,79 @@ export default function Search() {
     <div className={styles.search}>
       <div className={styles.btnLoginContainer}>
         {loggedIn ? (
-          <button onClick={handleLogout}>Logout</button>
+          <button onClick={handleLogout} className={styles.btnLogout}>
+            Logout
+          </button>
         ) : (
-          <button onClick={() => navigate('/login')}>Login</button>
+          <button
+            onClick={() => navigate('/login')}
+            className={styles.btnLogin}>
+            Login
+          </button>
         )}
       </div>
+      <h1>GitHub Repository Explorer</h1>
       <form onSubmit={handleSubmit} className='search-form'>
-        <div>
-          <label htmlFor='search'>Search GitHub Repositories</label>
+        <label htmlFor='search' className={styles.lblSearch}>
+          Enter a github username
+        </label>
+        <div className={styles.searchContainer}>
           <input
             type='text'
             id='search'
             value={searchUsername}
             onChange={(e) => setSearchUsername(e.target.value)}
-            placeholder='GitHub username'
+            placeholder='e.g. Doaa-Awan'
+            className={styles.inputSearch}
           />
+          <button
+            type='submit'
+            className={styles.btnSearch}
+            disabled={loading || !searchUsername}>
+            Search
+          </button>
         </div>
-        <button type='submit' disabled={loading || !searchUsername}>
-          {loading ? 'Searching...' : 'Search'}
-        </button>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      <div>
-        <ul>
+      {repos.length > 0 ? (
+        <div className={styles.repoContainer}>
           {repos.map((repo) => (
-            <li key={repo.id}>
-              <a href={repo.html_url} target='_blank' rel='noopener noreferrer'>
-                {repo.name}
-              </a>
-              {repo.description && <span>: {repo.description}</span>}
-            </li>
+            <div key={repo.id} className={styles.repoCard}>
+              <div className={styles.titleContainer}>
+                <a
+                  href={repo.html_url}
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                  {repo.name}
+                </a>
+                <div>❤️</div>
+              </div>
+              <div className={styles.description}>{repo.description}</div>
+              <div className={styles.footerContainer}>
+                {repo.language ? (
+                  <div className={styles.language}>{repo.language}</div>
+                ) : null}
+                {repo.stargazers_count !== 0 ? (
+                  <div className={styles.stars}>{repo.stargazers_count} ⭐</div>
+                ) : null}
+              </div>
+              <div className={styles.date}>Created: {repo.created_at}</div>
+            </div>
           ))}
-        </ul>
-      </div>
+        </div>
+      ) : (
+        <div className={styles.repoContainer}>
+          <p>Search for a user to view all their repositories</p>
+        </div>
+      )}
       {loggedIn ? (
-        <button onClick={() => navigate('/favourites')}>View Favourites</button>
+        <div className={styles.btnFavouritesContainer}>
+          <button
+            onClick={() => navigate('/favourites')}
+            className={styles.btnFavourites}>
+            Favourites →
+          </button>
+        </div>
       ) : null}
     </div>
   );

@@ -1,5 +1,127 @@
-.btnLoginContainer{
-    display: flex;
-    justify-content: end;
-    margin: 20px;
+.search {
+  margin: 20px;
+  height: 93vh;
+}
+
+h1 {
+  font-family: serif;
+  font-size: 1.5rem;
+  font-weight: unset;
+  /* text-align: center; */
+  color: #c2bdbd;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.572);
+}
+
+.btnLoginContainer {
+  display: flex;
+  justify-content: start;
+}
+
+.btnFavouritesContainer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: end;
+}
+
+.btnLogin,
+.btnLogout,
+.btnFavourites {
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  color: lightgray;
+  font-size: 12px;
+}
+
+.btnLogin {
+  background-color: #084c94;
+}
+
+.btnLogout {
+  background-color: #18667a;
+}
+
+.btnFavourites {
+  background: linear-gradient(
+    90deg,
+    rgba(106, 42, 155, 1) 0%,
+    rgba(87, 139, 199, 1) 100%
+  );
+}
+
+.lblSearch {
+  display: block;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.inputSearch {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  margin: 5px 0;
+  width: 100%;
+}
+
+.btnSearch {
+  background-color: #1c79ddd1;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 12px;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+}
+
+.repoContainer {
+  margin-top: 10px;
+  overflow-y: auto;
+  height: 320px;
+  border-bottom: 1px solid #555;
+  border-radius: 4px;
+}
+
+.repoCard {
+  border: 2px solid #555;
+  margin: 10px 0 0 0;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.repoCard .date {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.repoCard .description {
+  font-size: 0.9rem;
+}
+
+.repoCard .titleContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.repoCard .footerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.repoCard .language {
+  border: 1px solid white;
+  padding: 2px 10px;
+  border-radius: 25px;
+  font-size: 12px;
 }
