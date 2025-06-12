@@ -114,6 +114,7 @@ app.post('/api/logout', (req, res) => {
   res.status(200).json({ message: 'Logged out' });
 });
 
+// POST: ADD A FAVOURITE REPOSITORY
 app.post('/api/favorites', async (req, res) => {
   // Get the Supabase token from cookies
   const supabaseToken = req.cookies.supabase_token;
@@ -132,7 +133,7 @@ app.post('/api/favorites', async (req, res) => {
     return;
   }
 
-  const { repo_id, repo_name, repo_url } = req.body;
+  const { repo_id, repo_name, repo_url, repo_description, repo_stars, repo_language, created_at } = req.body;
   if (!repo_id || !repo_name || !repo_url) {
     res.status(400).json({ error: 'Missing repository data' });
     return;
@@ -141,7 +142,18 @@ app.post('/api/favorites', async (req, res) => {
   // Insert the favourite repo for the authenticated user
   const { data, error } = await supabase
     .from('favourite_repositories') // use your actual table name
-    .insert([{ user_id: user.id, repo_id, repo_name, repo_url }]);
+    .insert([
+      {
+        user_id: user.id,
+        repo_id,
+        repo_name,
+        repo_url,
+        repo_description,
+        repo_stars,
+        repo_language,
+        created_at,
+      },
+    ]);
 
   if (error) {
     res.status(400).json({ error: error.message });
@@ -151,6 +163,7 @@ app.post('/api/favorites', async (req, res) => {
   res.status(201).json(data);
 });
 
+//POST: DELETE A FAVOURITE REPOSITORY
 app.delete('/api/favorites', async (req, res) => {
   const supabaseToken = req.cookies.supabase_token;
   if (!supabaseToken) {

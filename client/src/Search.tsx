@@ -78,6 +78,10 @@ export default function Search() {
           repo_id: repo.id,
           repo_name: repo.name,
           repo_url: repo.html_url,
+          repo_description: repo.description,
+          repo_language: repo.language,
+          repo_stars: repo.stargazers_count,
+          created_at: repo.created_at
         },
         { withCredentials: true }
       );
