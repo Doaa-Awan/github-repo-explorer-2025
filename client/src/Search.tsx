@@ -13,37 +13,43 @@ export default function Search() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [favouriteRepoIds, setFavouriteRepoIds] = useState<string[]>([]);
 
-  // Check auth status and fetch favourites if logged in
-  useEffect(() => {
-    // Always re-fetch favourites when location changes
-    axios
-      .get('http://localhost:8080/api/favorites', { withCredentials: true })
-      .then((res) => {
-        setLoggedIn(true);
-        const favourites = res.data as Array<{ repo_id: string }>;
-        setFavouriteRepoIds(favourites.map((fav) => fav.repo_id.toString()));
-      })
-      .catch(() => {
-        setLoggedIn(false);
-        setFavouriteRepoIds([]);
-      });
-
-    // Re-fetch repos for last searched username
-    const lastSearchUsername = localStorage.getItem('lastSearchUsername');
-    if (lastSearchUsername) {
-      setSearchUsername(lastSearchUsername);
-      setLoading(true);
+  const fetchData = async () => {
+    try {
       axios
-        .get(`http://localhost:8080/api/github/${lastSearchUsername}/repos`)
-        .then((response) => {
-          setRepos(response.data as any[]);
-          setLoading(false);
+        .get('http://localhost:8080/api/favorites', { withCredentials: true })
+        .then((res) => {
+          setLoggedIn(true);
+          const favourites = res.data as Array<{ repo_id: string }>;
+          setFavouriteRepoIds(favourites.map((fav) => fav.repo_id.toString()));
         })
         .catch(() => {
-          setRepos([]);
-          setLoading(false);
+          setLoggedIn(false);
+          setFavouriteRepoIds([]);
         });
+      // Re-fetch repos for last searched username
+      const lastSearchUsername = localStorage.getItem('lastSearchUsername');
+      if (lastSearchUsername) {
+        setSearchUsername(lastSearchUsername);
+        setLoading(true);
+        axios
+          .get(`http://localhost:8080/api/github/${lastSearchUsername}/repos`)
+          .then((response) => {
+            setRepos(response.data as any[]);
+            setLoading(false);
+          })
+          .catch(() => {
+            setRepos([]);
+            setLoading(false);
+          });
+      }
+    } catch (err) {
+      alert(['Error fetching data from server']);
     }
+  };
+
+  // Check auth status and fetch favourites if logged in
+  useEffect(() => {
+    fetchData();
   }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,7 +87,7 @@ export default function Search() {
           repo_description: repo.description,
           repo_language: repo.language,
           repo_stars: repo.stargazers_count,
-          created_at: repo.created_at
+          created_at: repo.created_at,
         },
         { withCredentials: true }
       );
@@ -91,17 +97,17 @@ export default function Search() {
     }
   };
 
-  // const handleRemoveFavourite = async (repo: any) => {
-  //   try {
-  //     await axios.delete('http://localhost:8080/api/favorites', {
-  //       params: { repo_id: repo.id },
-  //       withCredentials: true,
-  //     });
-  //     setFavouriteRepoIds((prev) => prev.filter((id) => id !== repo.id));
-  //   } catch (err) {
-  //     alert('Failed to remove from favourites.');
-  //   }
-  // };
+  const handleRemoveFavourite = async (repo: any) => {
+    try {
+      await axios.delete('http://localhost:8080/api/favorites', {
+        data: { repo_id: repo.repo_id?.toString() || repo.id?.toString() },
+        withCredentials: true,
+      } as any);
+      fetchData();
+    } catch (err) {
+      alert('Failed to remove from favourites.');
+    }
+  };
 
   const handleLogout = async () => {
     await axios.post(
@@ -164,7 +170,17 @@ export default function Search() {
                   {repo.name}
                 </a>
                 {loggedIn && favouriteRepoIds.includes(repo.id.toString()) ? (
-                  <span style={{ marginLeft: 8, color: 'red' }}>❤️</span>
+                  <button
+                    style={{
+                      marginLeft: 8,
+                      color: 'red',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleRemoveFavourite(repo)}>
+                    ❤️
+                  </button>
                 ) : (
                   <button
                     style={{
