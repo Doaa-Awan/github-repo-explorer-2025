@@ -10,16 +10,20 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [loggedIn, setLoggedIn] = useState(false);
+  const [favouriteRepoIds, setFavouriteRepoIds] = useState<string[]>([]);
 
-  // Check auth status by calling the backend
+  // Check auth status and fetch favourites if logged in
   useEffect(() => {
     axios
       .get('http://localhost:8080/api/favorites', { withCredentials: true })
-      .then(() => setLoggedIn(true))
-      .catch((err) => {
-        if (err.response && err.response.status === 401) {
-          setLoggedIn(false);
-        }
+      .then((res) => {
+        setLoggedIn(true);
+        const favourites = res.data as Array<{ repo_id: string }>;
+        setFavouriteRepoIds(favourites.map((fav) => fav.repo_id));
+      })
+      .catch(() => {
+        setLoggedIn(false);
+        setFavouriteRepoIds([]);
       });
   }, []);
 
@@ -28,12 +32,14 @@ export default function Search() {
     setLoading(true);
     setError('');
     setRepos([]);
-    console.log(repos);
     try {
       const response = await axios.get(
         `http://localhost:8080/api/github/${searchUsername}/repos`
       );
       setRepos(response.data as any[]);
+      // Save to localStorage
+      localStorage.setItem('lastSearchUsername', searchUsername);
+      localStorage.setItem('lastSearchRepos', JSON.stringify(response.data));
     } catch (err) {
       setError('Failed to fetch repositories');
     } finally {
@@ -41,16 +47,48 @@ export default function Search() {
     }
   };
 
+  const handleAddFavourite = async (repo: any) => {
+    if (!loggedIn) {
+      alert('You must be logged in to add to your favourites.');
+      return;
+    }
+    try {
+      await axios.post(
+        'http://localhost:8080/api/favorites',
+        {
+          repo_id: repo.id,
+          repo_name: repo.name,
+          repo_url: repo.html_url,
+        },
+        { withCredentials: true }
+      );
+      setFavouriteRepoIds((prev) => [...prev, repo.id]);
+    } catch (err) {
+      alert('Failed to add to favourites.');
+    }
+  };
+
+  // const handleRemoveFavourite = async (repo: any) => {
+  //   try {
+  //     await axios.delete('http://localhost:8080/api/favorites', {
+  //       params: { repo_id: repo.id },
+  //       withCredentials: true,
+  //     });
+  //     setFavouriteRepoIds((prev) => prev.filter((id) => id !== repo.id));
+  //   } catch (err) {
+  //     alert('Failed to remove from favourites.');
+  //   }
+  // };
+
   const handleLogout = async () => {
     await axios.post(
       'http://localhost:8080/api/logout',
       {},
       { withCredentials: true }
     );
-    confirm('Are you sure you want to logout?');
-    if (!confirm) return;
     setLoggedIn(false);
-    // navigate('/login');
+    setFavouriteRepoIds([]);
+    navigate('/login');
   };
 
   return (
@@ -91,7 +129,7 @@ export default function Search() {
         </div>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      {repos.length > 0 ? (
+      {repos.length > 0 && (
         <div className={styles.repoContainer}>
           {repos.map((repo) => (
             <div key={repo.id} className={styles.repoCard}>
@@ -102,7 +140,22 @@ export default function Search() {
                   rel='noopener noreferrer'>
                   {repo.name}
                 </a>
-                <div>❤️</div>
+                {loggedIn && favouriteRepoIds.includes(repo.id) ? (
+                  <span style={{ marginLeft: 8, color: 'red' }}>❤️</span>
+                ) : (
+                  <button
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      marginLeft: 8,
+                      fontSize: '1.2em',
+                    }}
+                    onClick={() => handleAddFavourite(repo)}
+                    aria-label='Add to favourites'>
+                    ♡
+                  </button>
+                )}
               </div>
               <div className={styles.description}>{repo.description}</div>
               <div className={styles.footerContainer}>
@@ -116,10 +169,6 @@ export default function Search() {
               <div className={styles.date}>Created: {repo.created_at}</div>
             </div>
           ))}
-        </div>
-      ) : (
-        <div className={styles.repoContainer}>
-          <p>Search for a user to view all their repositories</p>
         </div>
       )}
       {loggedIn ? (

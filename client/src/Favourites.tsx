@@ -24,11 +24,11 @@ function Favourites() {
     <div>
       <ul>
         {data.map((repo) => (
-          <li key={repo.id}>
-            <a href={repo.url} target='_blank' rel='noopener noreferrer'>
-              {repo.name}
+          <li key={repo.repo_id}>
+            <a href={repo.repo_url} target='_blank' rel='noopener noreferrer'>
+              {repo.repo_name}
             </a>
-            {repo.description && <span>: {repo.description}</span>}
+            {repo.repo_description}
           </li>
         ))}
       </ul>

@@ -114,6 +114,74 @@ app.post('/api/logout', (req, res) => {
   res.status(200).json({ message: 'Logged out' });
 });
 
+app.post('/api/favorites', async (req, res) => {
+  // Get the Supabase token from cookies
+  const supabaseToken = req.cookies.supabase_token;
+  if (!supabaseToken) {
+    res.status(401).json({ error: 'Not authenticated' });
+    return;
+  }
+
+  // Get the user from the token
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser(supabaseToken);
+  if (userError || !user) {
+    res.status(401).json({ error: 'Invalid or expired token' });
+    return;
+  }
+
+  const { repo_id, repo_name, repo_url } = req.body;
+  if (!repo_id || !repo_name || !repo_url) {
+    res.status(400).json({ error: 'Missing repository data' });
+    return;
+  }
+
+  // Insert the favourite repo for the authenticated user
+  const { data, error } = await supabase
+    .from('favourite_repositories') // use your actual table name
+    .insert([{ user_id: user.id, repo_id, repo_name, repo_url }]);
+
+  if (error) {
+    res.status(400).json({ error: error.message });
+    return;
+  }
+
+  res.status(201).json(data);
+});
+
+app.delete('/api/favorites', async (req, res) => {
+  const supabaseToken = req.cookies.supabase_token;
+  if (!supabaseToken) {
+    res.status(401).json({ error: 'Not authenticated' });
+    return;
+  }
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser(supabaseToken);
+  if (userError || !user) {
+    res.status(401).json({ error: 'Invalid or expired token' });
+    return;
+  }
+  const { repo_id } = req.body;
+  if (!repo_id) {
+    res.status(400).json({ error: 'Missing repo_id' });
+    return;
+  }
+  const { error } = await supabase
+    .from('favourite_repositories')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('repo_id', repo_id);
+  if (error) {
+    res.status(400).json({ error: error.message });
+    return;
+  }
+  res.status(200).json({ message: 'Removed from favourites' });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
