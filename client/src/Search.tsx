@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './styles/SearchStyles.module.css';
 
 export default function Search() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchUsername, setSearchUsername] = useState('');
   const [repos, setRepos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -14,18 +15,36 @@ export default function Search() {
 
   // Check auth status and fetch favourites if logged in
   useEffect(() => {
+    // Always re-fetch favourites when location changes
     axios
       .get('http://localhost:8080/api/favorites', { withCredentials: true })
       .then((res) => {
         setLoggedIn(true);
         const favourites = res.data as Array<{ repo_id: string }>;
-        setFavouriteRepoIds(favourites.map((fav) => fav.repo_id));
+        setFavouriteRepoIds(favourites.map((fav) => fav.repo_id.toString()));
       })
       .catch(() => {
         setLoggedIn(false);
         setFavouriteRepoIds([]);
       });
-  }, []);
+
+    // Re-fetch repos for last searched username
+    const lastSearchUsername = localStorage.getItem('lastSearchUsername');
+    if (lastSearchUsername) {
+      setSearchUsername(lastSearchUsername);
+      setLoading(true);
+      axios
+        .get(`http://localhost:8080/api/github/${lastSearchUsername}/repos`)
+        .then((response) => {
+          setRepos(response.data as any[]);
+          setLoading(false);
+        })
+        .catch(() => {
+          setRepos([]);
+          setLoading(false);
+        });
+    }
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +81,7 @@ export default function Search() {
         },
         { withCredentials: true }
       );
-      setFavouriteRepoIds((prev) => [...prev, repo.id]);
+      setFavouriteRepoIds((prev) => [...prev, repo.id.toString()]);
     } catch (err) {
       alert('Failed to add to favourites.');
     }
@@ -140,7 +159,7 @@ export default function Search() {
                   rel='noopener noreferrer'>
                   {repo.name}
                 </a>
-                {loggedIn && favouriteRepoIds.includes(repo.id) ? (
+                {loggedIn && favouriteRepoIds.includes(repo.id.toString()) ? (
                   <span style={{ marginLeft: 8, color: 'red' }}>❤️</span>
                 ) : (
                   <button
