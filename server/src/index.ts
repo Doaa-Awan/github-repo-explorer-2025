@@ -19,7 +19,7 @@ app.use(
   cors(
     //requests accepted from React app
     {
-      origin: 'http://localhost:5173', //React app URL
+      origin: 'https://github-repo-explorer-2025-client.vercel.app/', //React app URL
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
       credentials: true,
     }
