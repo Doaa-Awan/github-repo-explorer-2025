@@ -8,7 +8,6 @@ dotenv.config();
 const PORT = process.env.VITE_PORT; //port for backend
 const app = express();
 
-// Initialize Supabase client
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseKey = process.env.VITE_SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -17,7 +16,6 @@ app.use(cookieParser()); //parse cookies
 app.use(express.json()); //parse incoming JSON requests
 app.use(
   cors(
-    //requests accepted from React app
     {
       origin: 'https://github-repo-explorer-2025-client.vercel.app/', //React app URL
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -28,10 +26,10 @@ app.use(
 
 app.get('/', (_req, res) => {
   res.json({ message: 'Hello, TypeScript + Express!' });
-  // res.send('Hello, TypeScript + Express!');
 });
 
-// Endpoint to fetch GitHub repositories for a given username
+// GET: REPO BY USERNAME /api/github
+
 app.get('/api/github/:username/repos', async (req, res) => {
   const { username } = req.params;
   try {
@@ -49,9 +47,10 @@ app.get('/api/github/:username/repos', async (req, res) => {
   }
 });
 
+// POST: LOGIN WITH EMAIL AND PASSWORD /api/login
+
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-  // console.log('Login attempt:', { email, password }); // Log the login attempt
   try {
     let { data, error } = await supabase.auth.signInWithPassword({
       email: email,
@@ -67,43 +66,14 @@ app.post('/api/login', async (req, res) => {
         .status(200)
         .json({ message: 'Token set' });
     }
-    // res.status(200).json({ message: 'Login successful', data: data });
   } catch (error) {
     console.error('Login error:', error);
     res.status(400).json({ error: 'Login failed' });
     return;
   }
-  // console.log('Supabase response:', { data, error }); // Log the Supabase response
 });
 
-app.get('/api/favorites', async (req, res) => {
-  //console.log('Fetching favorites...'); // Log the request
-  // const { user_id } = req.params;
-  const supabaseToken = req.cookies.supabase_token; // Get the Supabase token from cookies
-  // console.log(await supabase.auth.getUser(supabaseToken)); // Ensure the user is authenticated
-  const {
-    data: { user },
-  } = await supabase.auth.getUser(supabaseToken);
-
-  //console.log('Authenticated user:', user); // Log the authenticated user
-
-  if (!user) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
-  //console.log('Supabase token:', supabaseToken);
-
-  const { data, error } = await supabase
-    .from('favourite_repositories')
-    .select('*')
-    .eq('user_id', user.id);
-  if (error) {
-    res.status(400).json({ error: error.message });
-    return;
-  }
-  res.json(data);
-});
+// POST: LOGOUT CURRENT SESSION /api/logout
 
 app.post('/api/logout', (req, res) => {
   res.clearCookie('supabase_token', {
@@ -114,7 +84,33 @@ app.post('/api/logout', (req, res) => {
   res.status(200).json({ message: 'Logged out' });
 });
 
-// POST: ADD A FAVOURITE REPOSITORY
+// GET: FAVOURITE REPOS FOR USER LOGGED IN /api/favorites
+
+app.get('/api/favorites', async (req, res) => {
+  const supabaseToken = req.cookies.supabase_token; // Get the Supabase token from cookies
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(supabaseToken);
+
+  if (!user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('favourite_repositories')
+    .select('*')
+    .eq('user_id', user.id);
+
+  if (error) {
+    res.status(400).json({ error: error.message });
+    return;
+  }
+  res.json(data);
+});
+
+// POST: ADD A FAVOURITE REPOSITORY /api/favorites
+
 app.post('/api/favorites', async (req, res) => {
   // Get the Supabase token from cookies
   const supabaseToken = req.cookies.supabase_token;
@@ -141,7 +137,7 @@ app.post('/api/favorites', async (req, res) => {
 
   // Insert the favourite repo for the authenticated user
   const { data, error } = await supabase
-    .from('favourite_repositories') // use your actual table name
+    .from('favourite_repositories') //table
     .insert([
       {
         user_id: user.id,
@@ -163,7 +159,8 @@ app.post('/api/favorites', async (req, res) => {
   res.status(201).json(data);
 });
 
-//POST: DELETE A FAVOURITE REPOSITORY
+//POST: DELETE A FAVOURITE REPOSITORY /api/favorites
+
 app.delete('/api/favorites', async (req, res) => {
   const supabaseToken = req.cookies.supabase_token;
   if (!supabaseToken) {
@@ -203,7 +200,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export default app;
-
 
 // app.listen(PORT, () => {
 //   console.log(`Server running at http://localhost:${PORT}`);

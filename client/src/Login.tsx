@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './styles/LoginStyles.module.css'; // Assuming you have a CSS module for styles
+import styles from './styles/LoginStyles.module.css'; 
 import axios from 'axios';
 
 export default function Login() {
