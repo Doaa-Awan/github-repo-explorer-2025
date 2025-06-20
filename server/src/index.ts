@@ -16,7 +16,7 @@ app.use(cookieParser()); //parse cookies
 app.use(express.json()); //parse incoming JSON requests
 app.use(
   cors({
-    origin: 'https://github-repo-explorer-2025-client.vercel.app', //React app URL
+    origin: 'https://doaagithubrepoexplorer.netlify.app', //React app URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
@@ -48,12 +48,14 @@ app.get('/api/github/:username/repos', async (req, res) => {
 // POST: LOGIN WITH EMAIL AND PASSWORD /api/login
 
 app.post('/api/login', async (req, res) => {
+  console.log('Login request received:', req.body);
   const { email, password } = req.body;
   try {
     let { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
+    console.log('Supabase login response:', data, error);
     if (data?.session?.access_token) {
       res
         .cookie('supabase_token', data.session.access_token, {

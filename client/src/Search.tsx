@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './styles/SearchStyles.module.css';
 
 export default function Search() {
+  const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
   const navigate = useNavigate();
   const location = useLocation();
   const [searchUsername, setSearchUsername] = useState('');
@@ -16,7 +17,7 @@ export default function Search() {
   const fetchData = async () => {
     try {
       axios
-        .get('http://localhost:8080/api/favorites', { withCredentials: true })
+        .get(`${url}/api/favorites`, { withCredentials: true })
         .then((res) => {
           setLoggedIn(true);
           const favourites = res.data as Array<{ repo_id: string }>;
