@@ -15,13 +15,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 app.use(cookieParser()); //parse cookies
 app.use(express.json()); //parse incoming JSON requests
 app.use(
-  cors(
-    {
-      origin: 'https://github-repo-explorer-2025-client.vercel.app/', //React app URL
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      credentials: true,
-    }
-  )
+  cors({
+    origin: 'https://github-repo-explorer-2025-client.vercel.app', //React app URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
 );
 
 app.get('/', (_req, res) => {
@@ -30,7 +28,7 @@ app.get('/', (_req, res) => {
 
 // GET: REPO BY USERNAME /api/github
 
-app.get('/api/github/:username/repos', async (req, res) => {
+app.get('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/github/:username/repos', async (req, res) => {
   const { username } = req.params;
   try {
     const response = await fetch(
@@ -49,7 +47,7 @@ app.get('/api/github/:username/repos', async (req, res) => {
 
 // POST: LOGIN WITH EMAIL AND PASSWORD /api/login
 
-app.post('/api/login', async (req, res) => {
+app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     let { data, error } = await supabase.auth.signInWithPassword({
@@ -75,7 +73,7 @@ app.post('/api/login', async (req, res) => {
 
 // POST: LOGOUT CURRENT SESSION /api/logout
 
-app.post('/api/logout', (req, res) => {
+app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/logout', (req, res) => {
   res.clearCookie('supabase_token', {
     httpOnly: true,
     secure: true,
@@ -86,7 +84,7 @@ app.post('/api/logout', (req, res) => {
 
 // GET: FAVOURITE REPOS FOR USER LOGGED IN /api/favorites
 
-app.get('/api/favorites', async (req, res) => {
+app.get('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/favorites', async (req, res) => {
   const supabaseToken = req.cookies.supabase_token; // Get the Supabase token from cookies
   const {
     data: { user },
@@ -111,7 +109,7 @@ app.get('/api/favorites', async (req, res) => {
 
 // POST: ADD A FAVOURITE REPOSITORY /api/favorites
 
-app.post('/api/favorites', async (req, res) => {
+app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/favorites', async (req, res) => {
   // Get the Supabase token from cookies
   const supabaseToken = req.cookies.supabase_token;
   if (!supabaseToken) {
@@ -129,7 +127,15 @@ app.post('/api/favorites', async (req, res) => {
     return;
   }
 
-  const { repo_id, repo_name, repo_url, repo_description, repo_stars, repo_language, created_at } = req.body;
+  const {
+    repo_id,
+    repo_name,
+    repo_url,
+    repo_description,
+    repo_stars,
+    repo_language,
+    created_at,
+  } = req.body;
   if (!repo_id || !repo_name || !repo_url) {
     res.status(400).json({ error: 'Missing repository data' });
     return;
@@ -161,7 +167,7 @@ app.post('/api/favorites', async (req, res) => {
 
 //POST: DELETE A FAVOURITE REPOSITORY /api/favorites
 
-app.delete('/api/favorites', async (req, res) => {
+app.delete('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/favorites', async (req, res) => {
   const supabaseToken = req.cookies.supabase_token;
   if (!supabaseToken) {
     res.status(401).json({ error: 'Not authenticated' });
@@ -192,19 +198,8 @@ app.delete('/api/favorites', async (req, res) => {
   res.status(200).json({ message: 'Removed from favourites' });
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.VITE_PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
-}
-
-app.listen(process.env.VITE_PORT || PORT, () => {
+app.listen(process.env.PORT || PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
 
 export default app;
-
-// app.listen(PORT, () => {
-//   console.log(`Server running at http://localhost:${PORT}`);
-// });
