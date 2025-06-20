@@ -3,11 +3,12 @@ import axios from 'axios';
 import styles from './styles/SearchStyles.module.css';
 
 function Favourites() {
+  const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
   const [data, setData] = useState<any[]>([]);
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/favorites`, {
+      const response = await axios.get(`${url}/api/favorites`, {
         withCredentials: true,
       });
       const data = response.data as any[];
@@ -24,7 +25,7 @@ function Favourites() {
 
   const handleRemoveFavourite = async (repo: any) => {
     try {
-      await axios.delete('http://localhost:8080/api/favorites', {
+      await axios.delete(`${url}/api/favorites`, {
         data: { repo_id: repo.repo_id?.toString() || repo.id?.toString() },
         withCredentials: true,
       } as any);
