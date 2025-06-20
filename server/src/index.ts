@@ -199,6 +199,10 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+app.listen(process.env.VITE_PORT || PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+
 export default app;
 
 // app.listen(PORT, () => {
