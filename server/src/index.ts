@@ -28,7 +28,7 @@ app.get('/', (_req, res) => {
 
 // GET: REPO BY USERNAME /api/github
 
-app.get('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/github/:username/repos', async (req, res) => {
+app.get('/api/github/:username/repos', async (req, res) => {
   const { username } = req.params;
   try {
     const response = await fetch(
@@ -47,7 +47,7 @@ app.get('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/github/:use
 
 // POST: LOGIN WITH EMAIL AND PASSWORD /api/login
 
-app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     let { data, error } = await supabase.auth.signInWithPassword({
@@ -73,7 +73,7 @@ app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/login', as
 
 // POST: LOGOUT CURRENT SESSION /api/logout
 
-app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/logout', (req, res) => {
+app.post('/api/logout', (req, res) => {
   res.clearCookie('supabase_token', {
     httpOnly: true,
     secure: true,
@@ -84,7 +84,7 @@ app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/logout', (
 
 // GET: FAVOURITE REPOS FOR USER LOGGED IN /api/favorites
 
-app.get('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/favorites', async (req, res) => {
+app.get('/api/favorites', async (req, res) => {
   const supabaseToken = req.cookies.supabase_token; // Get the Supabase token from cookies
   const {
     data: { user },
@@ -109,7 +109,7 @@ app.get('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/favorites',
 
 // POST: ADD A FAVOURITE REPOSITORY /api/favorites
 
-app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/favorites', async (req, res) => {
+app.post('/api/favorites', async (req, res) => {
   // Get the Supabase token from cookies
   const supabaseToken = req.cookies.supabase_token;
   if (!supabaseToken) {
@@ -167,7 +167,7 @@ app.post('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/favorites'
 
 //POST: DELETE A FAVOURITE REPOSITORY /api/favorites
 
-app.delete('https://github-repo-explorer-a54306d5eed5.herokuapp.com/api/favorites', async (req, res) => {
+app.delete('/api/favorites', async (req, res) => {
   const supabaseToken = req.cookies.supabase_token;
   if (!supabaseToken) {
     res.status(401).json({ error: 'Not authenticated' });

@@ -4,13 +4,14 @@ import styles from './styles/LoginStyles.module.css';
 import axios from 'axios';
 
 export default function Login() {
+  const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     axios
-      .post('http://localhost:8080/api/login', {
+      .post(`${url}/api/login`, {
         email: email,
         password: password,
       }, {withCredentials: true}) // Include credentials for CORS
