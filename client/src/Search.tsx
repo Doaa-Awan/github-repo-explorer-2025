@@ -5,6 +5,7 @@ import styles from './styles/SearchStyles.module.css';
 
 export default function Search() {
   const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+  console.log('Backend URL:', url);
   const navigate = useNavigate();
   const location = useLocation();
   const [searchUsername, setSearchUsername] = useState('');
@@ -33,7 +34,7 @@ export default function Search() {
         setSearchUsername(lastSearchUsername);
         setLoading(true);
         axios
-          .get(`http://localhost:8080/api/github/${lastSearchUsername}/repos`)
+          .get(`${url}/api/github/${lastSearchUsername}/repos`)
           .then((response) => {
             setRepos(response.data as any[]);
             setLoading(false);
@@ -60,7 +61,7 @@ export default function Search() {
     setRepos([]);
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/github/${searchUsername}/repos`
+        `${url}/api/github/${searchUsername}/repos`
       );
       setRepos(response.data as any[]);
       // Save to localStorage
@@ -80,7 +81,7 @@ export default function Search() {
     }
     try {
       await axios.post(
-        'http://localhost:8080/api/favorites',
+        `${url}/api/favorites`,
         {
           repo_id: repo.id,
           repo_name: repo.name,
@@ -100,7 +101,7 @@ export default function Search() {
 
   const handleRemoveFavourite = async (repo: any) => {
     try {
-      await axios.delete('http://localhost:8080/api/favorites', {
+      await axios.delete(`${url}/api/favorites`, {
         data: { repo_id: repo.repo_id?.toString() || repo.id?.toString() },
         withCredentials: true,
       } as any);
@@ -112,7 +113,7 @@ export default function Search() {
 
   const handleLogout = async () => {
     await axios.post(
-      'http://localhost:8080/api/logout',
+      `${url}/api/logout`,
       {},
       { withCredentials: true }
     );
